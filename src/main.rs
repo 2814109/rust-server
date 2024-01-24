@@ -19,7 +19,6 @@ async fn main() {
     axum::serve(listener, app).await.unwrap();
 }
 
-#[axum::debug_handler]
 async fn handler() -> Result<Html<String>> {
     dotenv().ok();
     let url = env::var("GITHUB_API").expect("URL must be set");
