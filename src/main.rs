@@ -1,6 +1,8 @@
-use axum::{response::Html, routing::get, Router};
+use axum::{body::Body, extract::Request, http, response::Html, routing::get, Router};
+use std::{convert::Infallible, io};
 
 use dotenv::dotenv;
+use http::Response;
 use reqwest::Client;
 use std::env;
 
@@ -9,7 +11,15 @@ type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 #[tokio::main]
 async fn main() {
     // build our application with a route
-    let app = Router::new().route("/", get(handler));
+    let app = Router::new().route(
+        "/",
+        get(
+            |req: Request| async move {
+                let res = handler().await?;
+                Ok::<_, Infallible>(res)
+            }, // || async { handler }, // handler.await?
+        ),
+    );
 
     // run it
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
