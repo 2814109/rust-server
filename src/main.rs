@@ -1,8 +1,7 @@
-use axum::{body::Body, extract::Request, http, response::Html, routing::get, Router};
-use std::{convert::Infallible, io};
+use axum::{extract::Request, response::Html, routing::get, Router};
+use std::convert::Infallible;
 
 use dotenv::dotenv;
-use http::Response;
 use reqwest::Client;
 use std::env;
 
