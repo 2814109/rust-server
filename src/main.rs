@@ -44,11 +44,7 @@ async fn handler() -> Result<Html<String>> {
 
     let body = response.text().await?;
     Ok(Html(body))
-    // Ok((Html(&body)))
 }
-// use dotenv::dotenv;
-// use reqwest::Client;
-// use std::env;
 
 // #[tokio::main]
 // async fn main() -> Result<()> {
