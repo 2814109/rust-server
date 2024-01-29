@@ -9,7 +9,6 @@ use reqwest::Client;
 use std::env;
 use tower_http::cors::CorsLayer;
 
-// type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 #[tokio::main]
 async fn main() {
     // build our application with a route
@@ -19,16 +18,14 @@ async fn main() {
         .allow_credentials(true)
         .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE]);
 
-    let app = Router::new()
-        .route("/api/healthchecker", get(health_checker_handler))
-        .layer(cors);
+    let app = Router::new().route("/api/github", get(handler)).layer(cors);
 
     println!("🚀 Server started successfully");
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
 
-pub async fn health_checker_handler() -> axum::response::Result<impl IntoResponse> {
+pub async fn handler() -> axum::response::Result<impl IntoResponse> {
     dotenv().ok();
     let url = env::var("GITHUB_API").expect("URL must be set");
     let client: Client = Client::new();
