@@ -1,21 +1,40 @@
+use axum::{
+    async_trait,
+    http::{
+        header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
+        HeaderValue, Method,
+    },
+};
+use axum::{response::IntoResponse, Json};
+use axum::{routing::get, Router};
 use dotenv::dotenv;
 use reqwest::Client;
 use std::env;
+use tower_http::cors::CorsLayer;
 
-type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
-
+// type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 #[tokio::main]
-async fn main() -> Result<()> {
-    let app = Router::new().route("/", get(|| async { "Hello, world!" }));
+async fn main() {
+    // build our application with a route
+    let cors = CorsLayer::new()
+        .allow_origin("http://localhost:3000".parse::<HeaderValue>().unwrap())
+        .allow_methods([Method::GET, Method::POST, Method::PATCH, Method::DELETE])
+        .allow_credentials(true)
+        .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE]);
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
-    println!("listening on {}", addr);
-    axum_server::bind(addr)
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+    let app = Router::new()
+        .route("/api/healthchecker", get(health_checker_handler))
+        .layer(cors);
+
+    println!("🚀 Server started successfully");
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    axum::serve(listener, app).await.unwrap();
+}
+
+pub async fn health_checker_handler() -> axum::response::Result<impl IntoResponse> {
     dotenv().ok();
     let url = env::var("GITHUB_API").expect("URL must be set");
+    println!("{}", url);
     let client: Client = Client::new();
     let response = client
         .get(url)
@@ -24,10 +43,60 @@ async fn main() -> Result<()> {
             "Mozilla/5.0 (platform; rv:geckoversion) Gecko/geckotrail Firefox/firefoxversion",
         )
         .send()
-        .await?;
+        .await
+        .unwrap();
 
-    let body = response.text().await?;
-    println!("{}", body);
+    let body = response.text().await.unwrap();
+    // const MESSAGE: &str = "Build Simple CRUD API in Rust using Axum";
 
-    Ok(())
+    let json_response = serde_json::json!({
+        "status": "success",
+        "message": body
+    });
+
+    Ok(Json(json_response))
 }
+// #[debug_handler]
+// async fn handler() -> Result<Html<String>> {
+//     dotenv().ok();
+//     let url = env::var("GITHUB_API").expect("URL must be set");
+//     println!("{}", url);
+//     let client: Client = Client::new();
+//     let response = client
+//         .get(url)
+//         .header(
+//             reqwest::header::USER_AGENT,
+//             "Mozilla/5.0 (platform; rv:geckoversion) Gecko/geckotrail Firefox/firefoxversion",
+//         )
+//         .send()
+//         .await?;
+
+//     let body = response.text().await?;
+//     Ok(Html(body))
+// }
+
+// #[tokio::main]
+// async fn main() -> Result<()> {
+//     dotenv().ok();
+//     let url = env::var("GITHUB_API").expect("URL must be set");
+//     // let url = "https://zipcloud.ibsnet.co.jp/api/search";
+//     println!("{}", url);
+//     let client: Client = Client::new();
+//     let response = client
+//         .get(url)
+//         .header(
+//             reqwest::header::USER_AGENT,
+//             "Mozilla/5.0 (platform; rv:geckoversion) Gecko/geckotrail Firefox/firefoxversion",
+//         )
+//         .send()
+//         .await?;
+//     // let response = client
+//     //     .get(url)
+//     //     .query(&[("zipcode", "1000002")])
+//     //     .send()
+//     //     .await?;
+//     let body = response.text().await?;
+//     println!("{}", body);
+
+//     Ok(())
+// }
