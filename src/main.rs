@@ -1,9 +1,6 @@
-use axum::{
-    async_trait,
-    http::{
-        header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
-        HeaderValue, Method,
-    },
+use axum::http::{
+    header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
+    HeaderValue, Method,
 };
 use axum::{response::IntoResponse, Json};
 use axum::{routing::get, Router};
@@ -34,7 +31,6 @@ async fn main() {
 pub async fn health_checker_handler() -> axum::response::Result<impl IntoResponse> {
     dotenv().ok();
     let url = env::var("GITHUB_API").expect("URL must be set");
-    println!("{}", url);
     let client: Client = Client::new();
     let response = client
         .get(url)
@@ -56,47 +52,3 @@ pub async fn health_checker_handler() -> axum::response::Result<impl IntoRespons
 
     Ok(Json(json_response))
 }
-// #[debug_handler]
-// async fn handler() -> Result<Html<String>> {
-//     dotenv().ok();
-//     let url = env::var("GITHUB_API").expect("URL must be set");
-//     println!("{}", url);
-//     let client: Client = Client::new();
-//     let response = client
-//         .get(url)
-//         .header(
-//             reqwest::header::USER_AGENT,
-//             "Mozilla/5.0 (platform; rv:geckoversion) Gecko/geckotrail Firefox/firefoxversion",
-//         )
-//         .send()
-//         .await?;
-
-//     let body = response.text().await?;
-//     Ok(Html(body))
-// }
-
-// #[tokio::main]
-// async fn main() -> Result<()> {
-//     dotenv().ok();
-//     let url = env::var("GITHUB_API").expect("URL must be set");
-//     // let url = "https://zipcloud.ibsnet.co.jp/api/search";
-//     println!("{}", url);
-//     let client: Client = Client::new();
-//     let response = client
-//         .get(url)
-//         .header(
-//             reqwest::header::USER_AGENT,
-//             "Mozilla/5.0 (platform; rv:geckoversion) Gecko/geckotrail Firefox/firefoxversion",
-//         )
-//         .send()
-//         .await?;
-//     // let response = client
-//     //     .get(url)
-//     //     .query(&[("zipcode", "1000002")])
-//     //     .send()
-//     //     .await?;
-//     let body = response.text().await?;
-//     println!("{}", body);
-
-//     Ok(())
-// }
