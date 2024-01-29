@@ -2,8 +2,8 @@ use axum::http::{
     header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
     HeaderValue, Method,
 };
+use axum::{response::Html, routing::get, Router};
 use axum::{response::IntoResponse, Json};
-use axum::{routing::get, Router};
 use dotenv::dotenv;
 use reqwest::Client;
 use std::env;
@@ -18,11 +18,19 @@ async fn main() {
         .allow_credentials(true)
         .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE]);
 
-    let app = Router::new().route("/api/github", get(handler)).layer(cors);
+    let app = Router::new()
+        .route("/api/github", get(handler))
+        .route("/", get(|| async { "hello world!" }))
+        .route("/sample", get(handler_sample))
+        .layer(cors);
 
     println!("🚀 Server started successfully");
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
+}
+
+async fn handler_sample() -> Html<&'static str> {
+    Html("<h1>Hello, World!</h1>")
 }
 
 pub async fn handler() -> axum::response::Result<impl IntoResponse> {
