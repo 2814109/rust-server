@@ -13,7 +13,7 @@ use tower_http::cors::CorsLayer;
 async fn main() {
     // build our application with a route
     let cors = CorsLayer::new()
-        .allow_origin("http://localhost:3000".parse::<HeaderValue>().unwrap())
+        .allow_origin("http://localhost:5173".parse::<HeaderValue>().unwrap())
         .allow_methods([Method::GET, Method::POST, Method::PATCH, Method::DELETE])
         .allow_credentials(true)
         .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE]);
